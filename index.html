@@ -113,6 +113,7 @@
         }
 
         // 👑 તમારા વર્કિંગ કોડ મુજબનું પરફેક્ટ અને સુધારેલું ફંક્શન
+                // 👑 આ ૧૦０% ફિક્સ અને ફાઇનલ Regex આધારિત ફંક્શન છે
         async function processImageWithGemini() {
             const fileInput = document.getElementById('imageInput');
             const apiKeyInput = document.getElementById('settingApiKey').value.trim();
@@ -129,16 +130,16 @@
                 const base64Image = await toBase64(fileInput.files[0]);
                 const mimeType = fileInput.files[0].type;
 
-                // પ્રૉમ્પ્ટ અને કી બંને તમારા ઓરિજિનલ કન્સેપ્ટ મુજબ સેટ કર્યા
                 const promptText = `તમે expert accountant છો. આ બેંક statement/Rozmel page નો analysis કર અને exact transactions extract કર.
 
-Output ONLY valid JSON array - NO markdown, NO backticks:
+Output MUST be a valid JSON array of objects.
+Each object keys: "date" (YYYY-MM-DD), "particulars", "income", "expense".
+
+Example format:
 [
-  {"date": "2026-06-27", "particulars": "Loan Disbursement", "income": 50000.00, "expense": 0.00},
-  {"date": "2026-06-28", "particulars": "Withdrawal", "income": 0.00, "expense": 25000.00}
+  {"date": "2026-06-27", "particulars": "Loan Disbursement", "income": 50000.00, "expense": 0.00}
 ]`;
 
-                // વર્કિંગ v1beta એન્ડપોઇન્ટ
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKeyInput}`;
 
                 const response = await fetch(url, {
@@ -165,19 +166,27 @@ Output ONLY valid JSON array - NO markdown, NO backticks:
                 if (data.candidates && data.candidates[0].content.parts[0].text) {
                     let rawText = data.candidates[0].content.parts[0].text.trim();
                     
-                    // જો રિસ્પોન્સમાં બેકટીક્સ કે માર્કડાઉન હોય તો ક્લીન કરવા માટે
-                    if(rawText.startsWith("```json")) rawText = rawText.replace("```json", "").replace("```", "");
-                    else if(rawText.startsWith("```")) rawText = rawText.replace("```", "").replace("```", "");
-                    
-                    const jsonData = JSON.parse(rawText.trim());
-                    renderTable(jsonData);
-                    document.getElementById('resultSection').classList.remove('hidden');
+                    try {
+                        // 👑 મેજિક જુગાડ: લખાણમાંથી ફક્ત [ અને ] વચ્ચેનો સાચો JSON ડેટા જ ખેંચવો
+                        const jsonMatch = rawText.match(/\[\s*\{[\s\S]*\}\s*\]/);
+                        if (jsonMatch) {
+                            rawText = jsonMatch[0];
+                        }
+                        
+                        const jsonData = JSON.parse(rawText);
+                        renderTable(jsonData);
+                        document.getElementById('resultSection').classList.remove('hidden');
+                    } catch (jsonErr) {
+                        // જો હજુ ભૂલ થાય તો ગૂગલે આપેલું અસલી લખાણ જોવા માટે
+                        alert("JSON પાર્સિંગ પ્રોબ્લેમ! ગૂગલનો અસલી જવાબ આ હતો:\n\n" + rawText);
+                        console.error(jsonErr);
+                    }
                 } else {
-                    alert("સ્કેનિંગ એરર: ડેટા રીડ થઈ શક્યો નથી.");
+                    alert("સ્કેનિંગ એરર: રિસ્પોન્સ ખાલી મળ્યો છે.");
                 }
             } catch (err) {
                 document.getElementById('loading').classList.add('hidden');
-                alert("સિસ્ટમ એરર: ડેટા પ્રોસેસ કરવામાં ખામી આવી.");
+                alert("સિસ્ટમ એરર: નેટવર્ક અથવા કનેક્શન ખામી.");
                 console.error(err);
             }
         }
