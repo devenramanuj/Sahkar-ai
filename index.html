@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sahakar AI - ક્લાયન્ટ સાઇડ ઓટોમેશન</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Vadodara:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Hind Vadodara', sans-serif; }
+    </style>
+</head>
+<body class="text-white min-h-screen flex flex-col p-4 md:p-8" style="background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)">
+
+    <div class="max-w-6xl w-full mx-auto space-y-6">
+        
+        <!-- મેઈન હેડર બાર -->
+        <div class="flex justify-between items-center bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md">
+            <div>
+                <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Sahakar AI પોર્ટલ (GitHub Version)</h1>
+                <p class="text-sm text-slate-400">સહકારી મંડળી રોજમેળ ઓટોમેશન પ્રોસેસર</p>
+            </div>
+            <div class="flex gap-3">
+                <span class="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 text-xs px-3 py-1.5 rounded-full flex items-center font-semibold">Gemini 2.5 Flash</span>
+            </div>
+        </div>
+
+        <!-- ⚙️ એપ્લિકેશન કન્ફિગરેશન અને સેટિંગ્સ -->
+        <div class="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md shadow-xl">
+            <h3 class="text-lg font-bold border-b border-white/10 pb-3 mb-4 text-cyan-400">⚙️ એપ્લિકેશન કન્ફિગરેશન અને સેટિંગ્સ</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1 font-bold">GEMINI AI API KEY</label>
+                    <input type="password" id="settingApiKey" placeholder="અહીં તમારી Gemini API Key પેસ્ટ કરો..." class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-400 text-white">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1 font-bold">ભાષા (LANGUAGE)</label>
+                    <select id="settingLanguage" class="w-full bg-black/20 border border-white/10 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-cyan-400 text-white">
+                        <option value="gujarati">Gujarati (ગુજરાતી)</option>
+                        <option value="english">English (અંગ્રેજી)</option>
+                    </select>
+                </div>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">* આ કી તમારા બ્રાઉઝરના LocalStorage માં જ સેવ રહેશે, કોઈ સર્વર પર નહીં જાય.</p>
+        </div>
+
+        <!-- અપલોડ સેક્શન -->
+        <div class="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md shadow-xl text-center">
+            <h3 class="text-lg font-bold mb-4">૧. બેંક સ્ટેટમેન્ટ / રોજમેળ ઈમેજ અપલોડ કરો</h3>
+            <div class="max-w-md mx-auto">
+                <label class="flex flex-col items-center justify-center border-2 border-dashed border-white/20 hover:border-cyan-400/50 rounded-xl p-6 cursor-pointer bg-black/10 transition">
+                    <span class="text-sm text-slate-300" id="file-label">ફોટો સિલેક્ટ કરવા અહીં ક્લિક કરો</span>
+                    <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="updateFileName()">
+                </label>
+                <button onclick="processImageWithGemini()" class="mt-4 w-full bg-gradient-to-r from-cyan-500 to-purple-500 py-3 rounded-xl font-bold shadow-lg active:scale-95 transition">સ્કેન અને પ્રોસેસ કરો</button>
+            </div>
+        </div>
+
+        <!-- લોડિંગ એનિમેશન -->
+        <div id="loading" class="hidden text-center py-6">
+            <div class="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+            <p class="text-sm text-cyan-400">Gemini 2.5 Flash સીધું જ ઈમેજ સ્કેન કરી રહ્યું છે, કૃપા કરીને થોડી સેકન્ડ રાહ જુઓ...</p>
+        </div>
+
+        <!-- ડેટા ટેબલ પેનલ -->
+        <div id="resultSection" class="hidden bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md shadow-xl space-y-4">
+            <div class="flex justify-between items-center border-b border-white/10 pb-4 flex-wrap gap-3">
+                <div>
+                    <h3 class="text-lg font-bold">૨. સ્કેન થયેલ એન્ટ્રીઓ રિવ્યુ કરો</h3>
+                    <p class="text-xs text-slate-400">કોઈ ભૂલ હોય તો ખાનામાં જ સુધારી શકો છો</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="copyAutofillScript()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl transition">👑 Copy Auto-Entry Code</button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-white/5 text-slate-300 text-xs font-bold border-b border-white/10">
+                            <th class="p-3 text-center w-12">ક્રમ</th>
+                            <th class="p-3 w-40 text-center">તારીખ</th>
+                            <th class="p-3">વિગત</th>
+                            <th class="p-3 w-32 text-right">આવક/જમા</th>
+                            <th class="p-3 w-32 text-right">જાવક/ઉધાર</th>
+                        </tr>
+                    </thead>
+                    <tbody id="entriesTableBody" class="text-sm divide-y divide-white/5">
+                        <!-- ડાયનેમિક રોઝ -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // લોકલ સ્ટોરેજમાંથી કી લોડ કરવી
+        window.onload = function() {
+            const savedKey = localStorage.getItem('gemini_api_key');
+            if (savedKey) document.getElementById('settingApiKey').value = savedKey;
+        };
+
+        function updateFileName() {
+            const fileInput = document.getElementById('imageInput');
+            const fileLabel = document.getElementById('file-label');
+            if (fileInput.files.length > 0) {
+                fileLabel.innerText = "સિલેક્ટ ફાઈલ: " + fileInput.files[0].name;
+                fileLabel.classList.add('text-cyan-400');
+            }
+        }
+
+        // ફાઇલને Base64 માં કન્વર્ટ કરવાનું ફંક્શન
+        function toBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // 🚀 ડાયરેક્ટ ક્લાયન્ટ સાઇડથી Gemini API કોલ (No Server Needed)
+        async function processImageWithGemini() {
+            const fileInput = document.getElementById('imageInput');
+            const apiKeyInput = document.getElementById('settingApiKey').value.trim();
+
+            if (!apiKeyInput) return alert("કૃપા કરીને પહેલા સેટિંગ્સમાં તમારી Gemini API Key દાખલ કરો!");
+            if (fileInput.files.length === 0) return alert("કૃપા કરીને ફોટો સિલેક્ટ કરો!");
+
+            // કી સેવ રાખવી
+            localStorage.setItem('gemini_api_key', apiKeyInput);
+
+            document.getElementById('loading').classList.remove('hidden');
+            document.getElementById('resultSection').classList.add('hidden');
+
+            try {
+                const base64Image = await toBase64(fileInput.files[0]);
+                
+                const promptText = "Extract the bank statement transactions into a valid JSON array of objects. Each object must strictly have exactly these 4 keys: 'date' (format YYYY-MM-DD), 'particulars' (string description), 'income' (number, 0 if empty), and 'expense' (number, 0 if empty). Return ONLY the raw JSON array code without any markdown formatting wrappers or text.";
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKeyInput}`;
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                { text: promptText },
+                                { inlineData: { mimeType: "image/jpeg", data: base64Image } }
+                            ]
+                        }]
+                    })
+                });
+
+                const result = await response.json();
+                document.getElementById('loading').classList.add('hidden');
+
+                if (result.candidates && result.candidates[0].content.parts[0].text) {
+                    let rawText = result.candidates[0].content.parts[0].text.trim();
+                    // માર્કડાઉન સાફ કરવું જો આવ્યું હોય તો
+                    if(rawText.startsWith("```json")) rawText = rawText.replace("```json", "").replace("```", "");
+                    else if(rawText.startsWith("```")) rawText = rawText.replace("```", "").replace("```", "");
+                    
+                    const jsonData = JSON.parse(rawText.trim());
+                    renderTable(jsonData);
+                    document.getElementById('resultSection').classList.remove('hidden');
+                } else {
+                    alert("સ્કેનિંગ એરર: API એ સાચો રિસ્પોન્સ આપ્યો નથી.");
+                }
+            } catch (err) {
+                document.getElementById('loading').classList.add('hidden');
+                alert("ભૂલ: API કી ખોટી છે અથવા નેટવર્ક કનેક્શન પ્રોબ્લેમ છે.");
+                console.error(err);
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('entriesTableBody');
+            tbody.innerHTML = "";
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.className = "hover:bg-white/5 transition";
+                row.innerHTML = `
+                    <td class="p-3 text-center text-slate-400">${index + 1}</td>
+                    <td class="p-2"><input type="text" value="${item.date || ''}" class="bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white w-full text-center focus:border-cyan-400 focus:outline-none data-date"></td>
+                    <td class="p-2"><input type="text" value="${item.particulars || ''}" class="bg-black/40 border border-white/10 rounded px-2 py-1.5 text-white w-full focus:border-cyan-400 focus:outline-none data-part"></td>
+                    <td class="p-2"><input type="number" step="0.01" value="${item.income || 0}" class="bg-black/40 border border-white/10 rounded px-2 py-1.5 w-full text-right text-emerald-400 focus:border-cyan-400 focus:outline-none data-inc"></td>
+                    <td class="p-2"><input type="number" step="0.01" value="${item.expense || 0}" class="bg-black/40 border border-white/10 rounded px-2 py-1.5 w-full text-right text-rose-400 focus:border-cyan-400 focus:outline-none data-exp"></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function getTableData() {
+            const rows = document.querySelectorAll('#entriesTableBody tr');
+            const data = [];
+            rows.forEach(row => {
+                data.push({
+                    date: row.querySelector('.data-date').value,
+                    particulars: row.querySelector('.data-part').value,
+                    income: parseFloat(row.querySelector('.data-inc').value || 0),
+                    expense: parseFloat(row.querySelector('.data-exp').value || 0)
+                });
+            });
+            return data;
+        }
+
+        // 👑 ઓટો-એન્ટ્રી જાવાસ્ક્રિપ્ટ કોપી ફંક્શન
+        function copyAutofillScript() {
+            const data = getTableData();
+            if (data.length === 0) return alert("ટેબલમાં કોઈ ડેટા નથી!");
+
+            let scriptContent = `(function(){
+                const entries = ${JSON.stringify(data)};
+                let index = 0;
+                function fillNext() {
+                    if (index >= entries.length) {
+                        alert("બધી એન્ટ્રીઓ આપમેળે ટાઈપ થઈ ગઈ છે!");
+                        return;
+                    }
+                    const item = entries[index];
+                    let tDate = item.date.split('-').reverse().join('/');
+                    let dateInputs = document.querySelectorAll("input[type='text'], input[id*='Date']");
+                    if(dateInputs[0]) dateInputs[0].value = tDate;
+                    if(dateInputs[1]) dateInputs[1].value = tDate;
+                    
+                    let txtInputs = document.querySelectorAll("table input[type='text']");
+                    let numInputs = document.querySelectorAll("table input[type='number']");
+                    
+                    if(txtInputs.length > 0) txtInputs[txtInputs.length - 1].value = item.particulars;
+                    let amt = item.income > 0 ? item.income : item.expense;
+                    if(numInputs.length > 0) numInputs[numInputs.length - 1].value = amt;
+                    
+                    let addBtn = document.querySelector("button[id*='add'], button[class*='plus'], .fa-plus");
+                    if(addBtn) {
+                        addBtn.click();
+                        index++;
+                        setTimeout(fillNext, 850);
+                    } else {
+                        index++;
+                        fillNext();
+                    }
+                }
+                fillNext();
+            })();`;
+
+            navigator.clipboard.writeText(scriptContent).then(() => {
+                alert("👑 ઓટો-એન્ટ્રી કોડ કોપી થઈ ગયો છે!\n\nહવે ERP પેજ પર એડ્રેસ બારમાં javascript: લખીને આ પેસ્ટ કરો.");
+            }).catch(() => { alert("કોપી કરવામાં ખામી."); });
+        }
+    </script>
+</body>
+</html>
