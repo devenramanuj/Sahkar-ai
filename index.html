@@ -14,7 +14,6 @@
 
     <div class="max-w-6xl w-full mx-auto space-y-6">
         
-        <!-- મેઈન હેડર બાર -->
         <div class="flex justify-between items-center bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md">
             <div>
                 <h1 class="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">Sahakar AI પોર્ટલ (GitHub Version)</h1>
@@ -25,7 +24,6 @@
             </div>
         </div>
 
-        <!-- ⚙️ એપ્લિકેશન કન્ફિગરેશન અને સેટિંગ્સ -->
         <div class="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md shadow-xl">
             <h3 class="text-lg font-bold border-b border-white/10 pb-3 mb-4 text-cyan-400">⚙️ એપ્લિકેશન કન્ફિગરેશન અને સેટિંગ્સ</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -44,7 +42,6 @@
             <p class="text-xs text-slate-500 mt-2">* આ કી તમારા બ્રાઉઝરના LocalStorage માં જ સેવ રહેશે, કોઈ સર્વર પર નહીં જાય.</p>
         </div>
 
-        <!-- અપલોડ સેક્શન -->
         <div class="bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md shadow-xl text-center">
             <h3 class="text-lg font-bold mb-4">૧. બેંક સ્ટેટમેન્ટ / રોજમેળ ઈમેજ અપલોડ કરો</h3>
             <div class="max-w-md mx-auto">
@@ -56,13 +53,11 @@
             </div>
         </div>
 
-        <!-- લોડિંગ એનિમેશન -->
         <div id="loading" class="hidden text-center py-6">
             <div class="w-8 h-8 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
             <p class="text-sm text-cyan-400">Gemini 2.5 Flash સીધું જ ઈમેજ સ્કેન કરી રહ્યું છે, કૃપા કરીને થોડી સેકન્ડ રાહ જુઓ...</p>
         </div>
 
-        <!-- ડેટા ટેબલ પેનલ -->
         <div id="resultSection" class="hidden bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md shadow-xl space-y-4">
             <div class="flex justify-between items-center border-b border-white/10 pb-4 flex-wrap gap-3">
                 <div>
@@ -86,8 +81,7 @@
                         </tr>
                     </thead>
                     <tbody id="entriesTableBody" class="text-sm divide-y divide-white/5">
-                        <!-- ડાયનેમિક રોઝ -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
         </div>
@@ -95,7 +89,6 @@
     </div>
 
     <script>
-        // લોકલ સ્ટોરેજમાંથી કી લોડ કરવી
         window.onload = function() {
             const savedKey = localStorage.getItem('gemini_api_key');
             if (savedKey) document.getElementById('settingApiKey').value = savedKey;
@@ -110,7 +103,6 @@
             }
         }
 
-        // ફાઇલને Base64 માં કન્વર્ટ કરવાનું ફંક્શન
         function toBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -120,7 +112,7 @@
             });
         }
 
-        // 🚀 ડાયરેક્ટ ક્લાયન્ટ સાઇડથી Gemini API કોલ (No Server Needed)
+        // 👑 તમારા વર્કિંગ કોડ મુજબનું પરફેક્ટ અને સુધારેલું ફંક્શન
         async function processImageWithGemini() {
             const fileInput = document.getElementById('imageInput');
             const apiKeyInput = document.getElementById('settingApiKey').value.trim();
@@ -128,7 +120,6 @@
             if (!apiKeyInput) return alert("કૃપા કરીને પહેલા સેટિંગ્સમાં તમારી Gemini API Key દાખલ કરો!");
             if (fileInput.files.length === 0) return alert("કૃપા કરીને ફોટો સિલેક્ટ કરો!");
 
-            // કી સેવ રાખવી
             localStorage.setItem('gemini_api_key', apiKeyInput);
 
             document.getElementById('loading').classList.remove('hidden');
@@ -136,9 +127,18 @@
 
             try {
                 const base64Image = await toBase64(fileInput.files[0]);
-                
-                const promptText = "Extract the bank statement transactions into a valid JSON array of objects. Each object must strictly have exactly these 4 keys: 'date' (format YYYY-MM-DD), 'particulars' (string description), 'income' (number, 0 if empty), and 'expense' (number, 0 if empty). Return ONLY the raw JSON array code without any markdown formatting wrappers or text.";
+                const mimeType = fileInput.files[0].type;
 
+                // પ્રૉમ્પ્ટ અને કી બંને તમારા ઓરિજિનલ કન્સેપ્ટ મુજબ સેટ કર્યા
+                const promptText = `તમે expert accountant છો. આ બેંક statement/Rozmel page નો analysis કર અને exact transactions extract કર.
+
+Output ONLY valid JSON array - NO markdown, NO backticks:
+[
+  {"date": "2026-06-27", "particulars": "Loan Disbursement", "income": 50000.00, "expense": 0.00},
+  {"date": "2026-06-28", "particulars": "Withdrawal", "income": 0.00, "expense": 25000.00}
+]`;
+
+                // વર્કિંગ v1beta એન્ડપોઇન્ટ
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKeyInput}`;
 
                 const response = await fetch(url, {
@@ -148,18 +148,24 @@
                         contents: [{
                             parts: [
                                 { text: promptText },
-                                { inlineData: { mimeType: "image/jpeg", data: base64Image } }
+                                { inlineData: { mimeType: mimeType, data: base64Image } }
                             ]
                         }]
                     })
                 });
 
-                const result = await response.json();
+                const data = await response.json();
                 document.getElementById('loading').classList.add('hidden');
 
-                if (result.candidates && result.candidates[0].content.parts[0].text) {
-                    let rawText = result.candidates[0].content.parts[0].text.trim();
-                    // માર્કડાઉન સાફ કરવું જો આવ્યું હોય તો
+                if (data.error) {
+                    alert("Gemini API એરર: " + data.error.message);
+                    return;
+                }
+
+                if (data.candidates && data.candidates[0].content.parts[0].text) {
+                    let rawText = data.candidates[0].content.parts[0].text.trim();
+                    
+                    // જો રિસ્પોન્સમાં બેકટીક્સ કે માર્કડાઉન હોય તો ક્લીન કરવા માટે
                     if(rawText.startsWith("```json")) rawText = rawText.replace("```json", "").replace("```", "");
                     else if(rawText.startsWith("```")) rawText = rawText.replace("```", "").replace("```", "");
                     
@@ -167,11 +173,11 @@
                     renderTable(jsonData);
                     document.getElementById('resultSection').classList.remove('hidden');
                 } else {
-                    alert("સ્કેનિંગ એરર: API એ સાચો રિસ્પોન્સ આપ્યો નથી.");
+                    alert("સ્કેનિંગ એરર: ડેટા રીડ થઈ શક્યો નથી.");
                 }
             } catch (err) {
                 document.getElementById('loading').classList.add('hidden');
-                alert("ભૂલ: API કી ખોટી છે અથવા નેટવર્ક કનેક્શન પ્રોબ્લેમ છે.");
+                alert("સિસ્ટમ એરર: ડેટા પ્રોસેસ કરવામાં ખામી આવી.");
                 console.error(err);
             }
         }
@@ -207,7 +213,6 @@
             return data;
         }
 
-        // 👑 ઓટો-એન્ટ્રી જાવાસ્ક્રિપ્ટ કોપી ફંક્શન
         function copyAutofillScript() {
             const data = getTableData();
             if (data.length === 0) return alert("ટેબલમાં કોઈ ડેટા નથી!");
