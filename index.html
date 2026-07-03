@@ -58,26 +58,26 @@
             <p class="text-sm text-cyan-400">Gemini 2.5 Flash સીધું જ ઈમેજ સ્કેન કરી રહ્યું છે, કૃપા કરીને થોડી સેકન્ડ રાહ જુઓ...</p>
         </div>
 
-        <div id="resultSection" class="hidden bg-white/5 border border-white/10 p-6 rounded-2xl backdrop-blur-md shadow-xl space-y-4">
+                <div id="resultSection" class="hidden bg-white/5 border border-white/10 p-4 rounded-2xl backdrop-blur-md shadow-xl space-y-4">
             <div class="flex justify-between items-center border-b border-white/10 pb-4 flex-wrap gap-3">
                 <div>
-                    <h3 class="text-lg font-bold">૨. સ્કેન થયેલ એન્ટ્રીઓ રિવ્યુ કરો</h3>
-                    <p class="text-xs text-slate-400">કોઈ ભૂલ હોય તો ખાનામાં જ સુધારી શકો છો</p>
+                    <h3 class="text-lg font-bold text-slate-100">૨. સ્કેન થયેલ એન્ટ્રીઓ રિવ્યુ કરો</h3>
+                    <p class="text-xs text-slate-400">મોટી રકમ પણ હવે પૂરેપૂરી દેખાશે, કોઈ ભૂલ હોય તો સુધારી શકો છો</p>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="copyAutofillScript()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl transition">👑 Copy Auto-Entry Code</button>
+                    <button onclick="copyAutofillScript()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-lg">👑 Copy Auto-Entry Code</button>
                 </div>
             </div>
 
-            <div class="overflow-x-auto rounded-xl border border-white/5 bg-black/20">
-                <table class="w-full text-left border-collapse">
+            <div class="overflow-x-auto rounded-xl border border-white/5 bg-black/30">
+                <table class="w-full text-left border-collapse table-fixed min-w-[800px]">
                     <thead>
                         <tr class="bg-white/5 text-slate-300 text-xs font-bold border-b border-white/10">
-                            <th class="p-3 text-center w-12">ક્રમ</th>
-                            <th class="p-3 w-40 text-center">તારીખ</th>
-                            <th class="p-3">વિગત</th>
-                            <th class="p-3 w-32 text-right">આવક/જમા</th>
-                            <th class="p-3 w-32 text-right">જાવક/ઉધાર</th>
+                            <th class="p-2.5 text-center w-12">ક્રમ</th>
+                            <th class="p-2.5 w-36 text-center">તારીખ</th>
+                            <th class="p-2.5">વિગત (Particulars)</th>
+                            <th class="p-2.5 w-48 text-right text-emerald-400">આવક / જમા (Receipt)</th>
+                            <th class="p-2.5 w-48 text-right text-rose-400">જાવક / ઉધાર (Payment)</th>
                         </tr>
                     </thead>
                     <tbody id="entriesTableBody" class="text-sm divide-y divide-white/5">
